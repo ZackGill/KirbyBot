@@ -3,12 +3,12 @@
 import numpy as np
 import os
 import shutil
-import tkinter as wx
+import wx
 import matplotlib
-matplotlib.use('TKAgg')
+matplotlib.use('WXAgg')
 from datetime import datetime
 from matplotlib.figure import Figure
-from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg as FigCanvas
+from matplotlib.backends.backend_wxagg import FigureCanvasWxAgg as FigCanvas
 
 from utils import take_screenshot, XboxController
 
@@ -22,7 +22,7 @@ class MainWindow(wx.Frame):
 
 
     def __init__(self):
-        wx.Frame.__init__(self, None)
+        wx.Frame.__init__(self, None, title=self.title, size=(660,330))
 
         # Init controller
         self.controller = XboxController()
@@ -30,10 +30,12 @@ class MainWindow(wx.Frame):
          # Create GUI
         self.create_main_panel()
 
-        self.root = wx.Tk()
-
-        # Timer - just use after calls.
-        self.root.after(1500, self.on_timer())
+        # Timer
+        self.timer = wx.Timer(self)
+        self.Bind(wx.EVT_TIMER, self.on_timer, self.timer)
+        self.rate = SAMPLE_RATE
+        self.idle_rate = IDLE_SAMPLE_RATE
+        self.timer.Start(self.idle_rate)
 
         self.recording = False
         self.t = 0
@@ -41,40 +43,40 @@ class MainWindow(wx.Frame):
 
     def create_main_panel(self):
         # Panels
-        self.img_panel = wx.Canvas(self)
-        self.joy_panel = wx.Canvas(self)
-        self.record_panel = wx.Canvas(self)
+        self.img_panel = wx.Panel(self)
+        self.joy_panel = wx.Panel(self)
+        self.record_panel = wx.Panel(self)
 
         # Images
-        #img = wx.Image(320,240)
-        #self.image_widget = wx.StaticBitmap(self.img_panel, wx.ID_ANY, wx.Bitmap(img))
+        img = wx.Image(320,240)
+        self.image_widget = wx.StaticBitmap(self.img_panel, wx.ID_ANY, wx.Bitmap(img))
 
         # Joystick
-        #self.init_plot()
-        #self.PlotCanvas = FigCanvas(self.joy_panel, self.fig)
+        self.init_plot()
+        self.PlotCanvas = FigCanvas(self.joy_panel, wx.ID_ANY, self.fig)
 
         # Recording
-        self.txt_outputDir = wx.Entry(self)
+        self.txt_outputDir = wx.TextCtrl(self.record_panel, wx.ID_ANY, pos=(5,0), size=(320,30))
         uid = datetime.now().strftime('%Y-%m-%d_%H:%M:%S')
-        self.txt_outputDir.insert(0, "samples\\" + uid)
+        self.txt_outputDir.ChangeValue("samples/" + uid)
 
-        self.btn_record = wx.Button(self.record_panel, text="Record", width=(20), height=(5))
-        self.btn_record.bind("<Button-1>", self.on_btn_record)
-        #self.bind(wx.EVT_UPDATE_UI, self.on_update_btn_record, self.btn_record)
+        self.btn_record = wx.Button(self.record_panel, wx.ID_ANY, label="Record", pos=(335,0), size=(100,30))
+        self.Bind(wx.EVT_BUTTON, self.on_btn_record, self.btn_record)
+        self.Bind(wx.EVT_UPDATE_UI, self.on_update_btn_record, self.btn_record)
 
         # sizers
-        #sizer = wx.BoxSizer(wx.HORIZONTAL)
-        #sizer.Add(self.img_panel, 0, wx.ALL, 5)
-        #sizer.Add(self.joy_panel, 0, wx.ALL, 5)
+        sizer = wx.BoxSizer(wx.HORIZONTAL)
+        sizer.Add(self.img_panel, 0, wx.ALL, 5)
+        sizer.Add(self.joy_panel, 0, wx.ALL, 5)
 
-        #mainSizer_v = wx.BoxSizer(wx.VERTICAL)
-        #mainSizer_v.Add(sizer, 0 , wx.ALL, 5)
-        #mainSizer_v.Add(self.record_panel, 0 , wx.ALL, 5)
+        mainSizer_v = wx.BoxSizer(wx.VERTICAL)
+        mainSizer_v.Add(sizer, 0 , wx.ALL, 5)
+        mainSizer_v.Add(self.record_panel, 0 , wx.ALL, 5)
 
         # finalize layout
-        #self.SetAutoLayout(True)
-        #self.SetSizer(mainSizer_v)
-        self.pack()
+        self.SetAutoLayout(True)
+        self.SetSizer(mainSizer_v)
+        self.Layout()
 
 
     def init_plot(self):
@@ -85,15 +87,12 @@ class MainWindow(wx.Frame):
         self.axes = self.fig.add_subplot(111)
 
 
-    def on_timer(self):
+    def on_timer(self, event):
         self.poll()
-        if self.recording == True:
-            self.root.after(200, self.on_timer())
-        else:
-            self.root.after(1500, self.on_timer())
+
         # stop drawing if recording to avoid slow downs
         #if self.recording == False:
-        #    self.draw()
+         #   self.draw()
 
 
     def poll(self):
@@ -209,6 +208,7 @@ class MainWindow(wx.Frame):
 
 
 if __name__ == '__main__':
-    app = MainWindow()
-    app.master.title('Test')
-    app.mainloop()
+    app = wx.App()
+    app.frame = MainWindow()
+    app.frame.Show()
+    app.MainLoop()

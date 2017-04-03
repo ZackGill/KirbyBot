@@ -61,11 +61,19 @@ class PS4Controller(object):
 
                 # Insert your code on what you would like to happen for each event here!
                 # In the current setup, I have the state simply printing out to the screen.
+
+                # If every button is false, don't print. Trying to figure out buttons here.
+                shouldPrint = False
+                for i in self.button_data:
+                    shouldPrint = False
+                    if i == True:
+                        shouldPrint = True
                 
-                os.system('clear')
-                pprint.pprint(self.button_data)
-                pprint.pprint(self.axis_data)
-                pprint.pprint(self.hat_data)
+                
+                if shouldPrint == True:
+                    pprint.pprint(self.button_data)
+                    pprint.pprint(self.axis_data)
+                    pprint.pprint(self.hat_data)
 
 
 if __name__ == "__main__":

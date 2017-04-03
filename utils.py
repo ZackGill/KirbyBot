@@ -3,8 +3,10 @@
 import sys
 import array
 import pygame
-
-import tkinter as wx
+import wx
+from PIL import ImageGrab
+from PIL import Image
+wx.App()
 
 import numpy as np
 
@@ -21,10 +23,17 @@ import matplotlib.image as mpimg
 
 
 def take_screenshot():
-    screen = wx.ScreenDC()
-    bmp = wx.Bitmap(Screenshot.SRC_W, Screenshot.SRC_H)
-    mem = wx.MemoryDC(bmp)
-    mem.Blit(0, 0, Screenshot.SRC_W, Screenshot.SRC_H, screen, Screenshot.OFFSET_X, Screenshot.OFFSET_Y)
+
+    pilImage = ImageGrab.grab()
+    img = wx.Image(pilImage.size[0], pilImage.size[1], pilImage.convert("RGB").tobytes())
+
+    # Turning image into smaller one, too big for training on.
+    # Size values based on TensorKart, see if it is large enough.
+    size = 480, 615
+
+    img.Rescale(615, 480)
+
+    bmp = img.ConvertToBitmap()
     return bmp
 
 
@@ -64,20 +73,38 @@ class XboxController:
     def __init__(self):
         try:
             pygame.init()
-            self.joystick = pygame.joystick.Joystick(0)
+            self.joystick = pygame.joystick.Joystick(1)
             self.joystick.init()
         except:
-            print ('unable to connect to Xbox Controller')
+            print 'unable to connect to Xbox Controller'
 
 
     def read(self):
         pygame.event.pump()
         x = self.joystick.get_axis(0)
         y = self.joystick.get_axis(1)
-        a = self.joystick.get_button(0)
-        b = self.joystick.get_button(2) # b=1, x=2
-        rb = self.joystick.get_button(5)
-        return [x, y, a, b, rb]
+
+        b = self.joystick.get_button(0) # b on gamecube, x on PS4
+        a = self.joystick.get_button(1) # a on gamecube, circle on PS4
+        xB = self.joystick.get_button(2) # X, Square
+        yB = self.joystick.get_button(3) # Y, Triangle
+        z = self.joystick.get_button(4) # Z, LB
+        rT = self.joystick.get_button(5) # Right trigger, dolphin uses it on RB
+
+
+        # The rest of the buttons aren't needed, as d-pad is not detected
+        # by pygame. We will not be able to train it to taunt (unless we force
+        # it to do that at the start of a match)
+
+
+        # Converting pygame joystick values to Dolphin emulator values
+        # turn [-1, 1] to [0, 1], center is .5
+        x = 0.5 + (x/2.0)
+        y = 0.5 + (y/2.0)
+
+
+        
+        return [x, y, b, a, xB, yB, z, rT]
 
 
     def manual_override(self):
@@ -129,7 +156,7 @@ def viewer(sample):
     for i in range(len(image_files)):
 
         # joystick
-        print (i, " ", joystick_values[i,:])
+        print i, " ", joystick_values[i,:]
 
         # format data
         plotData.append( joystick_values[i,:] )
@@ -161,13 +188,13 @@ def viewer(sample):
 
 # prepare training data
 def prepare(samples):
-    print ("Preparing data")
+    print "Preparing data"
 
     X = []
     y = []
 
     for sample in samples:
-        print (sample)
+        print sample
 
         # load sample
         image_files, joystick_values = load_sample(sample)
@@ -181,14 +208,14 @@ def prepare(samples):
             vec = prepare_image(image)
             X.append(vec)
 
-    print ("Saving to file...")
+    print "Saving to file..."
     X = np.asarray(X)
     y = np.concatenate(y)
 
     np.save("data/X", X)
     np.save("data/y", y)
 
-    print ("Done!")
+    print "Done!"
     return
 
 
