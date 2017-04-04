@@ -21,6 +21,7 @@ from PyQt5 import QtWidgets
 from PyQt5.QtCore import QBuffer, QIODevice, QByteArray, QSize, Qt
 from PyQt5 import QtGui
 
+import os
 
 from io import BytesIO
 import sys
