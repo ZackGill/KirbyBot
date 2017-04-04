@@ -134,7 +134,7 @@ def screenshot():
 model = load_model("test_model20.h5")
 
 # open the pipe for writing
-path = '~/.dolphin-emu/Pipes/testPipe' # change if pipe is not this.
+path = os.path.expanduser('~/.dolphin-emu/Pipes/testPipe') # change if pipe is not this.
 pipe = open(path, 'w', buffering=1)
 
 
