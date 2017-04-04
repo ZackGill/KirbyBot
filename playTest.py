@@ -25,6 +25,8 @@ from PyQt5 import QtGui
 from io import BytesIO
 import sys
 
+import sched,time
+
 # Using these static values should cut down on memory needed for each image.
 SRC_H = 480
 SRC_W = 615
@@ -33,6 +35,58 @@ SRC_D = 3
 IMG_W = 200
 IMG_H = 66
 IMG_D = 3
+
+SAMPLE_RATE = .2
+
+def on_timer(sc):
+    image = []
+    image.append(np.asarray(screenshot()))
+
+    # Give image to model
+    out = model.predict(np.asarray(image))
+
+    # Print output/Pipe to dolphin
+    out_to_dolphin(out[0]) # Send the first entry (should be only one) in array
+    s.enter(SAMPLE_RATE, 1, on_timer, (sc,))
+
+def int_to_button(i):
+    if i == 2:
+        return "B"
+    elif i == 3:
+        return "A"
+    elif i == 4:
+        return "X"
+    elif i == 5:
+        return "Y"
+    elif i == 6:
+        return "Z"
+    elif i == 7:
+        return "R"
+
+def out_to_dolphin(model_out):
+
+    # Output is: X axis, Y axis, b, a, xB, yB, z, rT
+    # Since complex pipe input doesn't seem to be a thing, pipe input after
+    # converting it to dolphin readable format.
+
+
+
+
+    output = "SET MAIN "
+    output = output + str(model_out[0]) + " " + str(model_out[1]) + "\n" # SET MAIN [X] [Y]
+
+    # write to the pipe
+    pipe.write(output)
+
+    i = 2
+    while i < 8:
+        if float(model_out[i]) < .1:
+            output = "RELEASE " + int_to_button(i) + "\n"
+        else:
+            output = "PRESS " + int_to_button(i) + "\n"
+        pipe.write(output)
+        i = i+1
+
 
 
 def prepare_image(img):
@@ -76,9 +130,15 @@ def screenshot():
     test = prepare_image(img)
     return test
 
-image = []
-image.append(np.asarray(screenshot()))
-
 
 model = load_model("test_model20.h5")
-out = model.predict(np.asarray(image))
+
+# open the pipe for writing
+path = '~/.dolphin-emu/Pipes/testPipe' # change if pipe is not this.
+pipe = open(path, 'w', buffering=1)
+
+
+s = sched.scheduler(time.time, time.sleep)
+s.enter(SAMPLE_RATE, 1, on_timer, (s,))
+s.run()
+
