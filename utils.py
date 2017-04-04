@@ -1,5 +1,10 @@
 #!/usr/bin/env python
 
+
+# Various utility funcitons and classes. Has our input mapping via pygame.
+# Also takes screenshots if on Windows or Mac. Pil.ImageGrab does not work on
+# Linux. For the actual playing of the game, see play.py, which will do
+# screenshots a little different since it will run on Linux.
 import sys
 import array
 import pygame

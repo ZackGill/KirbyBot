@@ -1,5 +1,10 @@
 #!/usr/bin/env python
 
+
+# This module records gameplay footage, saves it as images. Reduces size of image
+# to save space, and allow for a match to fit into memory. See utils.py
+# Runs in Python 2.7, haven't hacked my installation of 3.5 to test yet.
+
 import numpy as np
 import os
 import shutil

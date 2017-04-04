@@ -1,5 +1,9 @@
 #!/usr/bin/env python
 
+# This module creates and trains the model. It needs to run in Python 3.5
+# py -3.5 works fine as a command so far.
+
+
 from keras.models import Sequential
 from keras.layers import Dense, Activation, Dropout, Flatten, Reshape, Lambda
 from keras.models import load_model
@@ -10,6 +14,9 @@ from skimage.transform import resize
 from skimage.io import imread
 from skimage.util import img_as_float
 from PIL import Image
+
+import glob
+import random
 
 # Using these static values should cut down on memory needed for each image.
 SRC_H = 480
@@ -61,65 +68,68 @@ model.compile(optimizer='rmsprop', loss='mean_squared_error', metrics=['accuracy
 inputX = []; # Inputs are a list of numpy arrays. Append a numpy array for each image
 labels = []; # Array of arrays, one array for each image.
 
-path = "samples/1" #path is relative. samples\1, samples\2, etc. for each recording session (one match)
-
-# For a quick test, just training on samples\1, testing on samples\2.
-
-# Loads the samples in
-images, joy_vals = load_sample(path)
-
-# Appending images to inputX
-for image_file in images:
-    image_file = image_file[2:-1]
-    image = imread(image_file) # Reads image from a file as an array
-    vec = prepare_image(image)
-    inputX.append(vec)
-
-# Appending joystick inputs to labels
-
-labels = joy_vals
-
-# training the model
-
-inputX = np.asarray(inputX)
-
-
-
-
-model.fit(inputX, labels, epochs=5)
-
 # testing the model
 testInput = [];
 testLabels = [];
 
-testImages, test_vals = load_sample("samples/2")
-for image_file in testImages:
-    image_file = image_file[2:-1]
-    image = imread(image_file)
-    vec = prepare_image(image)
-    testInput.append(vec)
+# Full and proper training will go here.
+# Train on 16 out of 20 matches. Randomly choose which ones are the 4 tests.
 
-testLabels.append(test_vals)
+path = "samples\\*" #path is relative. samples\1, samples\2, etc. for each recording session (one match)
 
-testInput = np.asarray(testInput)
+test = 0
 
+testImage = []
+samples = glob.glob(path)
+for sample in samples:
+    image_files, joy_vals = load_sample(sample)
+    # Since glob returns in arbitrary order, assume random enough for testing purposes.
+    # Since our test is seeing how it plays, not sure if keeping some data for testing is worth it.
+    # Also, not sure how accuracy is measured when we need to interpret our output somewhat to get it to match
+    # our predicted (.5 means I pressed button, etc.)
+    '''if testCount <= 3:
+        for image in image_files:
+            image = image[2:-1]
+            image = imread(image) # Read image as array
+            vec = prepare_image(image)
+            testInput.append(vec)
+        testLabels.append(joy_vals) # Append labels
+        testCount = testCount + 1
+    else:'''
+
+    for image in image_files:
+        image = image[2:-1]
+        image = imread(image) # Read image as array
+        vec = prepare_image(image)
+        inputX.append(vec)
+    labels.append(joy_vals) # Append labels
+
+    inputX = np.asarray(inputX)
+    model.fit(inputX, labels, epochs=20)
+    if test == 0:
+        testImage.append(inputX[0])
+    inputX = []
+    labels = []
+    test = 1
+    # Callin fit on a Keras model starts from where it left off. Because there are issues
+    # trying to train on all the data at once with passing of the labels, will just train at the end of each sample loop.
 
 #out = model.evaluate(testInput, testLabels)
 #print(out)
 
-predictIn = [];
-predictIn.append(testInput[0])
-
-
 # testing the save and load of a model.
-model.save('test_model.h5')
+model.save('test_model20.h5')
 del model
-model = load_model('test_model.h5')
+model = load_model('test_model20.h5')
 
 # This is how we use the model to play the game: Predict
 # Pass an image prepared as above to the predict function.
-output = model.predict(np.asarray(predictIn))
+output = model.predict(np.asarray(testImage))
 print(output)
-print(testLabels)
+
+# After Training on 5 epochs, out output actually makes some sense. 8 floats mostly within range.
+# the axis joysticks we will treat as is (negative being 0, beyond 1 being 1)
+# The button presses will be a "threshold" type deal, confidence in button type thing. If (.5) or greater, press button
+# Might need to fine tune that.
 
 
