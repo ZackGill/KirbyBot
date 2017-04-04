@@ -1,15 +1,14 @@
 #!/usr/bin/env python
 
 from keras.models import Sequential
-from keras.layers import Dense, Activation, Dropout, Flatten, Reshape, Lambda
-from keras.models import load_model
-from keras import backend as K
+from keras.layers import Dense, Activation, Dropout, Flatten
 import numpy as np
 from skimage.color import rgb2gray
 from skimage.transform import resize
 from skimage.io import imread
 from skimage.util import img_as_float
 from PIL import Image
+
 
 # Using these static values should cut down on memory needed for each image.
 SRC_H = 480
@@ -19,6 +18,7 @@ SRC_D = 3
 IMG_W = 200
 IMG_H = 66
 IMG_D = 3
+
 
 # Loading the samples from the csv.
 def load_sample(path):
@@ -39,17 +39,19 @@ def prepare_image(img):
 
     return img_as_float(im_arr)
 
-# Setting up the model - Need to provide a shape and such to Keras.
+# Setting up the model
+
+
+
 
 model = Sequential()
-model.add(Dense(64, input_shape=(66, 200, 3), activation='relu'))
+model.add(Dense(64, input_shape=(66, 200, 3)))
 model.add(Dense(64))
 model.add(Flatten())
 model.add(Dense(8))
 
 
-
-model.compile(optimizer='rmsprop', loss='mean_squared_error', metrics=['accuracy'])
+model.compile(optimizer='rmsprop', loss='categorical_crossentropy', metrics=['accuracy'])
 
 # Getting data together for training
 # Data is passed in images (viewed as array), labeled by arrays [x, y, b, a, xB, yB, z, rT]
@@ -57,6 +59,7 @@ model.compile(optimizer='rmsprop', loss='mean_squared_error', metrics=['accuracy
 
 # To make it easy, make a list of the data, then turn it into np.arrays as needed for Keras.
 # Keras: input can be a list of np arrays (which is why image is appened as np.array later)
+# Keras: Labels must be numpy arrays, so we convert the list as we pass it in.
 
 inputX = []; # Inputs are a list of numpy arrays. Append a numpy array for each image
 labels = []; # Array of arrays, one array for each image.
@@ -86,7 +89,7 @@ inputX = np.asarray(inputX)
 
 
 
-model.fit(inputX, labels, epochs=5)
+model.fit(inputX, labels, epochs=100)
 
 # testing the model
 testInput = [];
@@ -104,22 +107,8 @@ testLabels.append(test_vals)
 testInput = np.asarray(testInput)
 
 
-#out = model.evaluate(testInput, testLabels)
-#print(out)
-
-predictIn = [];
-predictIn.append(testInput[0])
 
 
-# testing the save and load of a model.
-model.save('test_model.h5')
-del model
-model = load_model('test_model.h5')
 
-# This is how we use the model to play the game: Predict
-# Pass an image prepared as above to the predict function.
-output = model.predict(np.asarray(predictIn))
-print(output)
-print(testLabels)
-
-
+out = model.evaluate(testInput, testLabels)
+print(out)
