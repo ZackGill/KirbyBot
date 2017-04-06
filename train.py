@@ -118,16 +118,14 @@ for sample in samples:
 #print(out)
 
 # testing the save and load of a model.
-model.save('test_model20.h5')
-del model
-model = load_model('test_model20.h5')
+model.save('test_model100.h5')
 
 # This is how we use the model to play the game: Predict
 # Pass an image prepared as above to the predict function.
 output = model.predict(np.asarray(testImage))
 print(output)
 
-# After Training on 5 epochs, out output actually makes some sense. 8 floats mostly within range.
+# After Training on 5+ epochs, out output actually makes some sense. 8 floats mostly within range.
 # the axis joysticks we will treat as is (negative being 0, beyond 1 being 1)
 # The button presses will be a "threshold" type deal, confidence in button type thing. If (.5) or greater, press button
 # Might need to fine tune that.

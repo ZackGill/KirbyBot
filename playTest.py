@@ -88,7 +88,7 @@ def out_to_dolphin(model_out):
         else:
             output = "PRESS " + int_to_button(i) + "\n"
         pipe.write(output)
-        print(output)
+       # print(output)
         i = i+1
 
 
