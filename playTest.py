@@ -81,11 +81,14 @@ def out_to_dolphin(model_out):
 
     i = 2
     while i < 8:
+        #if i == 6:
+        #    i = i + 1 # Skip z, always shielding. See what happens if option is removed.
         if float(model_out[i]) < .1:
             output = "RELEASE " + int_to_button(i) + "\n"
         else:
             output = "PRESS " + int_to_button(i) + "\n"
         pipe.write(output)
+        print(output)
         i = i+1
 
 
