@@ -105,7 +105,7 @@ for sample in samples:
     labels.append(joy_vals) # Append labels
 
     inputX = np.asarray(inputX)
-    model.fit(inputX, labels, epochs=20)
+    model.fit(inputX, labels, epochs=100)
     if test == 0:
         testImage.append(inputX[0])
     inputX = []
