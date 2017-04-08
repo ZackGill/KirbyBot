@@ -111,7 +111,7 @@ for sample in samples:
     inputX = []
     labels = []
     test = 1
-    # Callin fit on a Keras model starts from where it left off. Because there are issues
+    # Calling fit on a Keras model starts from where it left off. Because there are issues
     # trying to train on all the data at once with passing of the labels, will just train at the end of each sample loop.
 
 #out = model.evaluate(testInput, testLabels)

@@ -135,7 +135,7 @@ def screenshot():
     return test
 
 
-model = load_model("test_model20.h5")
+model = load_model("test_model100.h5")
 
 # open the pipe for writing
 path = os.path.expanduser('~/.dolphin-emu/Pipes/testPipe') # change if pipe is not this.
