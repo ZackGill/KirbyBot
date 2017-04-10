@@ -1,6 +1,13 @@
 # KirbyBot
 Training a bot using Tensor Flow (Keras) and training data from us to create a Neural Network to play Smash Bros Melee, as Kirby, on Temple.
 
+## Creators
+Zachary Gill
+
+Lucy Holland
+
+Jacob Pankey
+
 ## Inspiration and Other Resources
 
 The Idea to use TensorFlow (in this case, Kears) for gameplaying comes from Kevin Hughes and his Tensor Kart project.
