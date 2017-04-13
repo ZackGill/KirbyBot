@@ -17,17 +17,8 @@ Other Bots have been made to play Smash. To see what a Bot that wins almost all 
 
 ## See it in Action
 
-### 1 Epoch, 20 Samples
-[Youtube](https://www.youtube.com/watch?v=w_ZxwWj-GKU&t=1s)
-
-### 1 Epoch, 30 Samples
-[Youtube](https://www.youtube.com/watch?v=JfGR3xmGNMk)
-
-### 20 Epochs, 20 Samples
-[Youtube](https://www.youtube.com/watch?v=t1zuUD6aLz4)
-
-### 100 Epochs, 30 Samples
-[Youtube](https://www.youtube.com/watch?v=dY8kT6irSiw)
+### Playlist of videos
+[KirbyBot Playlist on YouTube](https://www.youtube.com/playlist?list=PLZ2okZX8BtwdHcoJslXv2xabzzlQ_kiec)
 
 ## How it works:
 KirbyBot is a neural network that has been trained on gameplay data gathered by us (not included in repo to save space). The ANN (Artifical Neural Network) then "plays" Smash Bros on the Dolphin Emulator.
