@@ -10,7 +10,7 @@ Jacob Pankey
 
 ## Inspiration and Other Resources
 
-The Idea to use TensorFlow (in this case, Kears) for gameplaying comes from Kevin Hughes and his Tensor Kart project.
+The Idea to use TensorFlow (in this case, Keras) for gameplaying comes from Kevin Hughes and his Tensor Kart project.
 [Tensor Kart](http://kevinhughes.ca/blog/tensor-kart)
 
 Other Bots have been made to play Smash. To see what a Bot that wins almost all the time looks like, check out [SmashBot](https://github.com/altf4/SmashBot)
